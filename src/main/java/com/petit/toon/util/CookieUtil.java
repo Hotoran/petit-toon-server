@@ -15,7 +15,7 @@ public class CookieUtil {
     public void add(HttpServletResponse response, String name, String value, int maxAge) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
-                .httpOnly(true)
+                .httpOnly(false)
                 .maxAge(maxAge)
                 .sameSite("Lax")
                 .build();

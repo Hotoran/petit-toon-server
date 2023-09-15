@@ -3,6 +3,7 @@ package com.petit.toon.controller.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petit.toon.controller.RestDocsSupport;
 import com.petit.toon.controller.user.request.LoginRequest;
+import com.petit.toon.controller.user.request.ReissueRequest;
 import com.petit.toon.controller.user.request.SignupRequest;
 import com.petit.toon.exception.badrequest.EmailAlreadyRegisteredException;
 import com.petit.toon.exception.badrequest.IpAddressNotMatchException;
@@ -31,8 +32,6 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.restdocs.cookies.CookieDocumentation.cookieWithName;
-import static org.springframework.restdocs.cookies.CookieDocumentation.requestCookies;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -249,13 +248,24 @@ class UserControllerTest extends RestDocsSupport {
                         .refreshToken("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYW1wbGVAZW1haWwuY29tIiwiZW1haWwiOiJzYW1wbGVAZW1haWwuY29tIiwiaWF0IjoxNjkxODQ5NDU1LCJleHAiOjE2OTMwNTkwNTV9.mTA7MeINcCshC7Oz5rY6R8RVX8TxrSFgakKBqIhK9pY")
                         .build());
 
+        ReissueRequest request = ReissueRequest.builder()
+                .refreshToken("eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzYW1wbGVAZW1haWwuY29tIiwiZW1haWwiOiJzYW1wbGVAZW1haWwuY29tIiwiaWF0IjoxNjkxODQ5NDU1LCJleHAiOjE2OTMwNTkwNTV9.mTA7MeINcCshC7Oz5rY6R8RVX8TxrSFgakKBqIhK9pY")
+                .build();
+
         mockMvc.perform(post("/api/v1/token/reissue")
-                        .cookie(cookie))
+//                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isOk())
                 .andDo(print())
                 .andDo(document("auth-reissue",
-                        requestCookies(
-                                cookieWithName("refreshToken").description("refresh 토큰")
+//                        requestCookies(
+//                                cookieWithName("refreshToken").description("refresh 토큰")
+//                        ),
+                        requestFields(
+                                fieldWithPath("refreshToken").type(JsonFieldType.STRING)
+                                        .description("refresh 토큰")
                         ),
                         responseFields(
                                 fieldWithPath("accessToken").type(JsonFieldType.STRING)

@@ -1,6 +1,7 @@
 package com.petit.toon.controller.user;
 
 import com.petit.toon.controller.user.request.LoginRequest;
+import com.petit.toon.controller.user.request.ReissueRequest;
 import com.petit.toon.controller.user.request.SignupRequest;
 import com.petit.toon.service.user.AuthService;
 import com.petit.toon.service.user.UserService;
@@ -10,7 +11,6 @@ import com.petit.toon.service.user.response.AuthResponse;
 import com.petit.toon.service.user.response.ReissueResponse;
 import com.petit.toon.service.user.response.SignupResponse;
 import com.petit.toon.util.CookieUtil;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.petit.toon.security.JwtTokenProvider.ACCESS_TOKEN_VALID_TIME_MILLISECONDS;
 import static com.petit.toon.security.JwtTokenProvider.REFRESH_TOKEN_VALID_TIME_MILLISECONDS;
@@ -53,18 +52,19 @@ public class UserController {
     }
 
     @PostMapping("/api/v1/token/reissue")
-    public ResponseEntity<ReissueResponse> reissue(HttpServletRequest httpRequest,
+    public ResponseEntity<ReissueResponse> reissue(@Valid @RequestBody ReissueRequest request,
+                                                   HttpServletRequest httpRequest,
                                                    HttpServletResponse httpResponse) {
-        Optional<Cookie> refreshToken = cookieUtil.get(httpRequest, "refreshToken");
-        if (refreshToken.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        String tokenValue = refreshToken.get().getValue();
-        ReissueServiceRequest serviceRequest = ReissueServiceRequest.builder()
-                .refreshToken(tokenValue)
-                .clientIp(getClientIp(httpRequest))
-                .build();
-
+        ReissueServiceRequest serviceRequest = request.toServiceRequest(getClientIp(httpRequest));
+//        Optional<Cookie> refreshToken = cookieUtil.get(httpRequest, "refreshToken");
+//        if (refreshToken.isEmpty()) {
+//            return ResponseEntity.badRequest().build();
+//        }
+//        String tokenValue = refreshToken.get().getValue();
+//        ReissueServiceRequest serviceRequest = ReissueServiceRequest.builder()
+//                .refreshToken(tokenValue)
+//                .clientIp(getClientIp(httpRequest))
+//                .build();
         ReissueResponse response = authService.reissueToken(serviceRequest);
         cookieUtil.add(httpResponse, "accessToken", response.getAccessToken(), (int) ACCESS_TOKEN_VALID_TIME_MILLISECONDS / 1000);
         return ResponseEntity.ok(response);
