@@ -283,9 +283,16 @@ class UserControllerTest extends RestDocsSupport {
         given(cookieUtil.get(any(), anyString())).willReturn(Optional.of(cookie));
         given(authService.reissueToken(any())).willThrow(new TokenNotValidException());
 
+        ReissueRequest request = ReissueRequest.builder()
+                .refreshToken("잘못된 토큰 값을 입력한 경우")
+                .build();
+
         // when // then
         mockMvc.perform(post("/api/v1/token/reissue")
-                        .cookie(cookie))
+//                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.message").value(TokenNotValidException.MESSAGE))
@@ -307,9 +314,16 @@ class UserControllerTest extends RestDocsSupport {
         given(cookieUtil.get(any(), anyString())).willReturn(Optional.of(cookie));
         given(authService.reissueToken(any())).willThrow(new RefreshTokenNotFoundException());
 
+        ReissueRequest request = ReissueRequest.builder()
+                .refreshToken("Refresh 토큰 유효 기간이 지난 경우")
+                .build();
+
         // when // then
         mockMvc.perform(post("/api/v1/token/reissue")
-                        .cookie(cookie))
+//                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message").value(RefreshTokenNotFoundException.MESSAGE))
@@ -331,9 +345,16 @@ class UserControllerTest extends RestDocsSupport {
         given(cookieUtil.get(any(), anyString())).willReturn(Optional.of(cookie));
         given(authService.reissueToken(any())).willThrow(new IpAddressNotMatchException());
 
+        ReissueRequest request = ReissueRequest.builder()
+                .refreshToken("로그인 했을 때의 IP 주소와 다른 경우")
+                .build();
+
         // when // then
         mockMvc.perform(post("/api/v1/token/reissue")
-                        .cookie(cookie))
+//                        .cookie(cookie)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .content(objectMapper.writeValueAsBytes(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("400"))
                 .andExpect(jsonPath("$.message").value(IpAddressNotMatchException.MESSAGE))
